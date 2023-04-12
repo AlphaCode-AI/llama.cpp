@@ -1,3 +1,24 @@
+
+# Alphacode Korean Model Migration to llama.cpp
+
+1. Clone this repo.
+2. Type following command.
+   ``` 
+   cd llama.cpp
+   make . 
+   ```
+3. [Download Korean 7b 4bit-quant Distilt Model](https://drive.google.com/file/d/1vsR0jvRGvSCrNdXBare5wfA85O0xBuJi/view?usp=share_link)
+
+4. Type following command.
+ ```
+./main -m (your_model_download_path_in_3) -f ../prompts/sample.txt --color -ins -c 2048 -n 200 --temp 0.5 --top_k 5 --top_p 0.99 --repeat_last_n 64 --repeat_penalty 1.0
+ ```
+    
+
+
+
+
+
 # llama.cpp
 
 ![llama](https://user-images.githubusercontent.com/1991296/230134379-7181e485-c521-4d23-a0d6-f7b3b61ba524.png)
