@@ -5,7 +5,7 @@
 2. Type following command.
    ``` 
    cd llama.cpp
-   make . 
+   make
    ```
 3. [Download Korean 7b 4bit-quant Distilt Model](https://drive.google.com/file/d/1vsR0jvRGvSCrNdXBare5wfA85O0xBuJi/view?usp=share_link)
 
