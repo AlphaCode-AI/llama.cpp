@@ -8,6 +8,9 @@
    make
    ```
 3. [Download Korean 7b 4bit-quant Distilt Model](https://drive.google.com/file/d/1vsR0jvRGvSCrNdXBare5wfA85O0xBuJi/view?usp=share_link)
+   [Download Korean 12.8b 4bit-quant Distilt Model](https://storage.cloud.google.com/liam_llm_model/ggml-model-q4_3.bin)
+   [Download Korean 12.8b 8bit-quant Distilt Model](https://storage.cloud.google.com/liam_llm_model/ggml-model-q8_0.bin)
+   [Download Korean 12.8b non-quant Distilt Model](https://storage.cloud.google.com/liam_llm_model/ggml-model-f16.bin)
 
 4. Type following command.
  ```
