@@ -1,7 +1,6 @@
 from langchain.llms.base import LLM
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from llama_index.embeddings.langchain import LangchainEmbedding
-
 import argparse
 import os
 import torch
@@ -12,11 +11,13 @@ from llama_index import (
     QuestionAnswerPrompt,
     PromptHelper,
     ServiceContext,
+    StorageContext,
     VectorStoreIndex,
     Document,
     SimpleDirectoryReader,
     download_loader,
-    set_global_service_context
+    set_global_service_context,
+    load_index_from_storage
 )
 from llama_index.llm_predictor import HuggingFaceLLMPredictor
 from pathlib import Path
@@ -58,27 +59,14 @@ num_output = 256
 pipeline = pipeline(
     model=args.model, device=args.device, model_kwargs={"torch_dtype": torch.bfloat16}
 )
-CJKPDFReader = download_loader("CJKPDFReader")
-loader = CJKPDFReader()
-
-documents = None
-for file in os.listdir(args.path):
-    if file.endswith(".pdf"):
-        d = loader.load_data(file=os.path.join(args.path, file))
-        if documents is None:
-            documents = d
-        else:
-            for innerd in d:
-                documents.append(innerd)
 
 
-
-query_str = QA_PROMPT_TMPL = (
+QA_PROMPT_TMPL = (
     "We have provided context information below. \n"
     "---------------------\n"
     "{context_str}"
     "\n---------------------\n"
-    "Given this information, I want you to act as insurance assistance. I’ll write you my insurance info and my diagnosis , and you’ll inform for me which guaranteed amount, info from via my insurance terms and answer this : {query}\n"
+    "Given this information, I want you to act as insurance assistance. I’ll write you my insurance info and my diagnosis , and you’ll inform for me which guaranteed amount, info from via my insurance terms and answer this : {query_str}\n"
 )
 
 hf_predictor = HuggingFaceLLMPredictor(
@@ -105,11 +93,29 @@ set_global_service_context(service_context)
 
 
 QA_PROMPT = QuestionAnswerPrompt(QA_PROMPT_TMPL)
-index = VectorStoreIndex.from_documents(documents)
 
-index.storage_context.persist()
 
-engine = index.as_query_engine(streaming=True, text_qa_template=QA_PROMPT)
-response = engine.query(query_str)
+if os.path.exists("./storage"):
+    storage_context = StorageContext.from_defaults(persist_dir="./storage")
+    index = load_index_from_storage(storage_context)
+else:
+    CJKPDFReader = download_loader("CJKPDFReader")
+    loader = CJKPDFReader()
+
+    documents = None
+    for file in os.listdir(args.path):
+        if file.endswith(".pdf"):
+            d = loader.load_data(file=os.path.join(args.path, file))
+            if documents is None:
+                documents = d
+            else:
+                for innerd in d:
+                    documents.append(innerd)
+
+    index = VectorStoreIndex.from_documents(documents)
+    index.storage_context.persist()
+
+engine = index.as_query_engine(text_qa_template=QA_PROMPT)
+response = engine.query(query)
 
 print(response)
