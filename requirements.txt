@@ -1,2 +1,7 @@
 numpy==1.24
 sentencepiece==0.1.98
+langchain==0.0.193
+llama_index==0.6.21.post1
+torch==2.0.0
+transformers==4.28.1
+sentence_transformers
