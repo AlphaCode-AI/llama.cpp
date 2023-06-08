@@ -91,7 +91,7 @@ hf_predictor = HuggingFaceLLMPredictor(
 )
 
 embed_model = LangchainEmbedding(
-    HuggingFaceEmbeddings(model_name="sentence-transformers/ko-sroberta-multitask")
+    HuggingFaceEmbeddings(model0_name="jhgan/ko-sroberta-multitask")
 )
 
 
