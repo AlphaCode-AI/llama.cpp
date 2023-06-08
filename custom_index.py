@@ -1,4 +1,6 @@
 from langchain.llms.base import LLM
+from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+from llama_index.embeddings.langchain import LangchainEmbedding
 
 import argparse
 import os
@@ -18,21 +20,6 @@ from llama_index import (
 from llama_index.llm_predictor import HuggingFaceLLMPredictor
 from pathlib import Path
 from typing import Optional, List, Mapping, Any
-
-
-class CustomLLM(LLM):
-    def _call(self, prompt: str, stop: Optional[List[str]] = None) -> str:
-        prompt_length = len(prompt)
-        response = pipeline(prompt, max_new_tokens=num_output)[0]["generated_text"]
-        return response[prompt_length:]
-
-    @property
-    def _identifying_params(self) -> Mapping[str, Any]:
-        return {"name_of_model": model_name}
-
-    @property
-    def _llm_type(self) -> str:
-        return "custom"
 
 
 parser = argparse.ArgumentParser()
@@ -96,14 +83,11 @@ query_str = QA_PROMPT_TMPL = (
 hf_predictor = HuggingFaceLLMPredictor(
     max_input_size=2048,
     max_new_tokens=256,
-    temperature=0.25,
-    do_sample=False,
     query_wrapper_prompt=QA_PROMPT_TMPL,
-    tokenizer_name="LlamaTokenizer",
+    tokenizer_name=args.model,
     model_name=args.model,
-    device_map="auto",
     tokenizer_kwargs={"max_length": 2048},
-    model_kwargs={"torch_dtype": torch.bfloat16},
+    model_kwargs={"offload_folder": "offload", "torch_dtype": torch.bfloat16},
 )
 
 embed_model = LangchainEmbedding(
