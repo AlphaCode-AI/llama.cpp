@@ -5,7 +5,8 @@ import argparse
 import os
 import torch
 
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
+
 from llama_index import (
     GPTListIndex,
     QuestionAnswerPrompt,
@@ -56,9 +57,6 @@ args = parser.parse_args()
 context_window = 2048
 num_output = 256
 
-pipeline = pipeline(
-   model=args.model, device=args.device
-)
 
 
 QA_PROMPT_TMPL = (
@@ -67,20 +65,22 @@ QA_PROMPT_TMPL = (
     " Given this information, I want you to act as insurance assistance. I’ll write you my insurance info and my diagnosis , and you’ll inform for me which guaranteed amount, info from via my insurance terms and answer this : {query_str}\n"
 )
 
-hf_predictor = HuggingFaceLLMPredictor(
-   max_input_size=2048,
-   max_new_tokens=256,
-   tokenizer_name=args.model,
-   model_name=args.model,
-   tokenizer_kwargs={"max_length": 2048},
-   model_kwargs={"offload_folder": args.model + "_offload"}
-)
+config = AutoConfig.from_pretrained("beomi/kollama-7b")
 
+tokenizer = AutoTokenizer.from_pretrained("beomi/kollama-7b")
+model = AutoModelForCausalLM.from_config(config)
+
+hf_predictor = HuggingFaceLLMPredictor(
+    max_input_size=2048,
+    max_new_tokens=256,
+    tokenizer=tokenizer,
+    model=model,
+    tokenizer_kwargs={"max_length": 2048},
+)
 
 embed_model = LangchainEmbedding(
    HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
 )
-
 
 service_context = ServiceContext.from_defaults(
    chunk_size_limit=512, llm_predictor=hf_predictor, embed_model=embed_model
@@ -88,9 +88,7 @@ service_context = ServiceContext.from_defaults(
 
 set_global_service_context(service_context)
 
-
 QA_PROMPT = QuestionAnswerPrompt(QA_PROMPT_TMPL)
-
 
 if os.path.exists("./storage"):
     storage_context = StorageContext.from_defaults(persist_dir="./storage")
