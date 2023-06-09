@@ -29,7 +29,7 @@ parser.add_argument(
     "-m", 
     "--model", 
     dest="model", 
-    default="beomi/KoAlpaca", 
+    default="beomi/kollama-7b", 
     action="store"
 )
 parser.add_argument(
@@ -57,36 +57,33 @@ context_window = 2048
 num_output = 256
 
 pipeline = pipeline(
-    model=args.model, device=args.device, model_kwargs={"torch_dtype": torch.bfloat16}
+   model=args.model, device=args.device
 )
 
 
 QA_PROMPT_TMPL = (
-    "We have provided context information below. \n"
-    "---------------------\n"
-    "{context_str}"
-    "\n---------------------\n"
-    "Given this information, I want you to act as insurance assistance. I’ll write you my insurance info and my diagnosis , and you’ll inform for me which guaranteed amount, info from via my insurance terms and answer this : {query_str}\n"
+    "We have provided context information below. \n "
+    "{context_str} \n"
+    " Given this information, I want you to act as insurance assistance. I’ll write you my insurance info and my diagnosis , and you’ll inform for me which guaranteed amount, info from via my insurance terms and answer this : {query_str}\n"
 )
 
 hf_predictor = HuggingFaceLLMPredictor(
-    max_input_size=2048,
-    max_new_tokens=256,
-    query_wrapper_prompt=QA_PROMPT_TMPL,
-    tokenizer_name=args.model,
-    model_name=args.model,
-    tokenizer_kwargs={"max_length": 2048},
-    model_kwargs={"offload_folder": args.model + "_offload", "torch_dtype": torch.bfloat16},
+   max_input_size=2048,
+   max_new_tokens=256,
+   tokenizer_name=args.model,
+   model_name=args.model,
+   tokenizer_kwargs={"max_length": 2048},
+   model_kwargs={"offload_folder": args.model + "_offload"}
 )
 
 
 embed_model = LangchainEmbedding(
-    HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
+   HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
 )
 
 
 service_context = ServiceContext.from_defaults(
-    chunk_size_limit=512, llm_predictor=hf_predictor, embed_model=embed_model
+   chunk_size_limit=512, llm_predictor=hf_predictor, embed_model=embed_model
 )
 
 set_global_service_context(service_context)
@@ -115,7 +112,10 @@ else:
     index = VectorStoreIndex.from_documents(documents)
     index.storage_context.persist()
 
-engine = index.as_query_engine(text_qa_template=QA_PROMPT)
-response = engine.query(query)
+print(QA_PROMPT.prompt)
+print(args.query)
+
+engine = index.as_query_engine()
+response = engine.query(args.query)
 
 print(response)
