@@ -23,13 +23,13 @@
 
 # Custom KoAlpaca model with LLAMA_Index
 ## How to Use
-
+ ```
 python custom_index.py -m (huggingface_model_name) -p (docs_path) -d (device_type cpu/cuda/mps) -q (query)
-
-huggingface_model_name : 허깅페이스에서 가져올 모델네임 (ex. beomi/KoAlpaca)
-docs_path : pdf 도큐먼트 가져올 경로
-device : 인퍼런스 환경 디바이스 종류 (cpu, cuda, mps)
-query : 질문내용
+ ```
+- huggingface_model_name : 허깅페이스에서 가져올 모델네임 (ex. beomi/KoAlpaca)
+- docs_path : pdf 도큐먼트 가져올 경로
+- device : 인퍼런스 환경 디바이스 종류 (cpu, cuda, mps)
+- query : 질문내용
 
 # llama.cpp
 
